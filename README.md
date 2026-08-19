@@ -15,3 +15,35 @@ RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' \
 В таком случае структура приложения внутри контейнера сохраняется ```/var/www/html/public/index.php```, а Apache настраивается таким образом, чтобы использовать ```/var/www/html/public``` в качестве DocumentRoot. 
 <br>Это более комплексный и предпочтительный подход для приложений с разделением публичной и внутренней частей, так как директория public становится единственной директорией, доступной через веб-сервер. При этом остальные директории приложения (app, config, storage и т. д.) не должны напрямую раздаваться Apache.
 
+# Задание №2
+
+Разделил запросы на 3 группы (3 файла):
+- `init.sql` - создание таблиц
+- `seed.sql` - заполнение таблиц данными
+- `queries.sql` - запросы к базе данных
+
+Для запуска в docker прописал пути к файлам с таблицами:
+```
+volumes:
+- mysql_data:/var/lib/mysql
+- ./database/init.sql:/docker-entrypoint-initdb.d/01-init.sql
+- ./database/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql
+- ./database/queries.sql:/docker-entrypoint-initdb.d/03-queries.sql
+```
+Таблицы успешно создаются:
+```
+docker exec -it mysql_db mysql -uapp -papp app
+
+mysql> SHOW TABLES
+
++---------------+
+| Tables_in_app |
++---------------+
+| tasks         |
+| users         |
++---------------+
+2 rows in set (0.00 sec)
+```
+![alt text](image.png)
+Трудностей с заданием не возникло.
+
