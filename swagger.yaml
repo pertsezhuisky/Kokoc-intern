@@ -1,0 +1,204 @@
+openapi: 3.0.3
+
+info:
+  title: KokocTech Intern API
+  description: REST API для работы с пользователями и задачами
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080
+    description: Локальный сервер
+
+tags:
+  - name: Users
+    description: Работа с пользователями
+  - name: Tasks
+    description: Работа с задачами
+
+paths:
+
+  /api/users:
+    post:
+      tags:
+        - Users
+      summary: Регистрация пользователя
+      description: Создаёт нового пользователя. Пароль сохраняется в базе данных в виде хэша.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserRequest'
+            example:
+              email: new.user@example.com
+              password: password123
+              name: New User
+
+      responses:
+        '201':
+          description: Пользователь успешно зарегистрирован
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+              example:
+                message: Пользователь зарегистрирован
+                user:
+                  id: 9
+                  email: new.user@example.com
+                  name: New User
+
+        '400':
+          description: Некорректные входные данные
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                requiredFields:
+                  summary: Не заполнены обязательные поля
+                  value:
+                    error: Email, password и name обязательны
+                invalidEmail:
+                  summary: Некорректный email
+                  value:
+                    error: Некорректный email
+
+        '409':
+          description: Пользователь с таким email уже существует
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: Пользователь с таким email уже существует
+
+        '500':
+          description: Ошибка базы данных
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: Ошибка при создании пользователя
+
+
+  /api/users/{id}/tasks:
+    get:
+      tags:
+        - Users
+      summary: Получение задач пользователя
+      description: Возвращает список задач указанного пользователя.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID пользователя
+          schema:
+            type: integer
+            minimum: 1
+          example: 1
+
+      responses:
+        '200':
+          description: Список задач пользователя
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserTasksResponse'
+              example:
+                user_id: 1
+                tasks:
+                  - id: 1
+                    title: Implement authentication
+                    description: Implement user authentication
+                    user_id: 1
+                    created_at: "2026-08-21 10:00:00"
+                  - id: 2
+                    title: Create database schema
+                    description: Create database schema
+                    user_id: 1
+                    created_at: "2026-08-21 11:00:00"
+                count: 2
+
+        '404':
+          description: Пользователь не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: Пользователь не найден
+
+        '500':
+          description: Ошибка базы данных
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: Ошибка при получении задач
+
+
+  /api/tasks:
+    post:
+      tags:
+        - Tasks
+      summary: Создание задачи
+      description: Создаёт новую задачу для существующего пользователя.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTaskRequest'
+            example:
+              user_id: 1
+              title: Test task
+              description: Testing task creation through API
+
+      responses:
+        '201':
+          description: Задача успешно создана
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskResponse'
+              example:
+                message: Задача создана
+                task:
+                  id: 9
+                  title: Test task
+                  description: Testing task creation through API
+                  user_id: 1
+                  created_at: "2026-08-21 12:00:00"
+
+        '400':
+          description: Некорректные входные данные
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                requiredFields:
+                  summary: Не заполнены обязательные поля
+                  value:
+                    error: user_id и title обязательны для заполнения
+
+        '404':
+          description: Пользователь не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: Пользователь не найден
+
+        '500':
+          description: Ошибка базы данных
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: Ошибка при создании задачи
