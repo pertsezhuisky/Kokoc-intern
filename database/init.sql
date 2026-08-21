@@ -10,7 +10,8 @@ CREATE TABLE users (
 
 CREATE TABLE tasks (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(50) NOT NULL,
+    title VARCHAR(100) NOT NULL,
+    description TEXT,
     user_id INT NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 
